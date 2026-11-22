@@ -49,8 +49,33 @@ import fs from 'node:fs/promises'
       label: 'Read system text selection',
       description: 'Automatically get current text selection and translate',
     },
+    {
+      name: 'provider',
+      type: 'dropdown',
+      title: 'Translation Provider',
+      description: 'Translation service to use',
+      required: true,
+      default: 'google',
+      data: [
+        {
+          title: 'Google Translate',
+          value: 'google',
+        },
+        {
+          title: 'DeepL',
+          value: 'deepl',
+        },
+      ],
+    },
+    {
+      name: 'deeplApiKey',
+      type: 'password',
+      title: 'DeepL API Key',
+      description: 'DeepL API authentication key (supports both Free keys ending in ":fx" and Pro keys)',
+      required: false,
+    },
     ...langs,
   ]
 
-  await fs.writeFile('./package.json', JSON.stringify(pkg, null, 2))
+  await fs.writeFile('./package.json', `${JSON.stringify(pkg, null, 2)}\n`)
 })()

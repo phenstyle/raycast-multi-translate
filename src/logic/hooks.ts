@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import { getPreferenceValues, getSelectedText } from '@raycast/api'
 import type { LanguageCode } from '../data/languages'
+import type { TranslateOptions, TranslateProvider } from '../types'
 
 // preferences won't change at runtime.
 export const preferences = getPreferenceValues<Preferences.Translate>()
+
+export const translateOptions: TranslateOptions = {
+  provider: (preferences.provider || 'google') as TranslateProvider,
+  deeplApiKey: preferences.deeplApiKey,
+}
 
 export const targetLanguages = (() => {
   const pref = getPreferenceValues<Preferences.Translate>()

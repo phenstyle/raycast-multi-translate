@@ -2,6 +2,15 @@ import type { LanguageCode } from './data/languages'
 
 export { LanguageCode }
 
+export type TranslateProvider = 'google' | 'deepl'
+
+export interface TranslateOptions {
+  provider?: TranslateProvider
+  deeplApiKey?: string
+  /** @internal */
+  fetchFn?: typeof fetch
+}
+
 export interface TranslateResult {
   original: string
   translated: string

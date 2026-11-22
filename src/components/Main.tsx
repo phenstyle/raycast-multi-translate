@@ -5,7 +5,8 @@ import { usePromise } from '@raycast/utils'
 import type { LanguageCode } from '../data/languages'
 import { getLanguageName, languages, languagesByCode } from '../data/languages'
 import { translateAll } from '../logic/translator'
-import { targetLanguages, useDebouncedValue, useSystemSelection } from '../logic/hooks'
+import { getDeepLWebUrl } from '../logic/deepl'
+import { targetLanguages, translateOptions, useDebouncedValue, useSystemSelection } from '../logic/hooks'
 import { unicodeTransform } from '../logic/text'
 import { spellcheck } from '../logic/spellcheck'
 import { webDictionaries } from '../data/web-dictionaries'
@@ -43,7 +44,7 @@ export function Main(): ReactElement {
 
   const { data: results, isLoading } = usePromise(
     translateAll,
-    [debouncedText, langFrom, langs],
+    [debouncedText, langFrom, langs, translateOptions],
     {
       onError(error) {
         showToast({
@@ -165,9 +166,18 @@ export function Main(): ReactElement {
                       />
                     ))
                   }
+                  {translateOptions.provider === 'deepl'
+                    ? (
+                      <Action.OpenInBrowser
+                        title="Open in DeepL"
+                        shortcut={{ modifiers: ['opt'], key: 'enter' }}
+                        url={getDeepLWebUrl(item.original, item.from, item.to)}
+                      />
+                      )
+                    : null}
                   <Action.OpenInBrowser
                     title="Open in Google Translate"
-                    shortcut={{ modifiers: ['opt'], key: 'enter' }}
+                    shortcut={translateOptions.provider === 'deepl' ? undefined : { modifiers: ['opt'], key: 'enter' }}
                     url={`https://translate.google.com/?sl=${item.from}&tl=${item.to}&text=${encodeURIComponent(item.original)}&op=translate`}
                   />
                   <Action.OpenInBrowser

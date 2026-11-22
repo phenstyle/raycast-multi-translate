@@ -4,17 +4,40 @@ import { usePromise } from '@raycast/utils'
 import { getLanguageName } from '../data/languages'
 import type { TranslateResult } from '../types'
 import { translate } from '../logic/translator'
+import { translateOptions } from '../logic/hooks'
 
 export function TranslateDetail({ item }: { item: TranslateResult }): ReactElement {
-  const { data: translatedBack, isLoading } = usePromise(translate, [item.translated, item.to, item.from])
+  const canTranslateBack = item.from !== 'auto'
+  const { data: translatedBack, isLoading } = usePromise(
+    translate,
+    [item.translated, item.to, item.from, translateOptions],
+    { execute: canTranslateBack },
+  )
 
+  const backText = translatedBack?.translated || ''
   let markdown = item.translated
-  if (translatedBack) {
-    if (translatedBack.translated !== item.original)
-      markdown += `\n\n------\n\n${translatedBack.translated}`
-  }
+  if (backText && backText !== item.original)
+    markdown += `\n\n------\n\n${backText}`
 
-  const isTheSame = translatedBack && translatedBack.translated.trim().toLowerCase() === item.original.trim().toLowerCase()
+  const isTheSame = Boolean(backText) && backText.trim().toLowerCase() === item.original.trim().toLowerCase()
+  const backStatusText = !canTranslateBack
+    ? 'Unavailable'
+    : isLoading
+      ? 'Loading...'
+      : !backText
+          ? 'Unavailable'
+          : isTheSame
+            ? 'Same'
+            : 'Different'
+  const backStatusIcon = !canTranslateBack
+    ? Icon.Minus
+    : isLoading
+      ? Icon.CircleProgress
+      : !backText
+          ? Icon.Minus
+          : isTheSame
+            ? Icon.Checkmark
+            : Icon.Info
 
   return (
     <List.Item.Detail
@@ -26,8 +49,8 @@ export function TranslateDetail({ item }: { item: TranslateResult }): ReactEleme
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Translate Back"
-            text={isLoading ? 'Loading...' : isTheSame ? 'Same' : 'Different'}
-            icon={isLoading ? Icon.CircleProgress : isTheSame ? Icon.Checkmark : Icon.Info}
+            text={backStatusText}
+            icon={backStatusIcon}
           />
         </List.Item.Detail.Metadata>
       }
